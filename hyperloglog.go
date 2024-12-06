@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io"
+	"math"
 )
 
 // The bitstream implementation taken from https://github.com/kkdai/bstream
@@ -139,6 +140,27 @@ func get_msb_of_remaining_hash(k int, hash []byte) int {
 		}
 	}
 	return msb - k
+}
+
+func hyperLogLog(k int, elems []string) uint64 {
+	cardinality := uint64(0)
+	buckets := make([]uint64, k)
+
+	for _, v := range elems {
+		hash := generate_hash(v)
+		bucket_idx := get_first_k_bits(k, hash)
+		msb := get_msb_of_remaining_hash(k, hash)
+		buckets[bucket_idx] = max(buckets[bucket_idx], uint64(msb))
+	}
+
+	Z := float64(0)
+	for _, v := range buckets {
+		Z += math.Pow(float64(1/2), float64(v))
+	}
+
+	cardinality = uint64(float64(0.79402) * float64(k) * float64(k) * Z)
+
+	return cardinality
 }
 
 func main() {
