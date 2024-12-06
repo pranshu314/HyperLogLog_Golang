@@ -144,7 +144,8 @@ func get_msb_of_remaining_hash(k int, hash []byte) int {
 
 func hyperLogLog(k int, elems []string) uint64 {
 	cardinality := uint64(0)
-	buckets := make([]uint64, k)
+	buckets_len := int(math.Pow(2, float64(k)))
+	buckets := make([]uint64, buckets_len)
 
 	for _, v := range elems {
 		hash := generate_hash(v)
@@ -158,19 +159,17 @@ func hyperLogLog(k int, elems []string) uint64 {
 		Z += math.Pow(float64(1/2), float64(v))
 	}
 
-	cardinality = uint64(float64(0.79402) * float64(k) * float64(k) * Z)
+	cardinality = uint64(float64(0.79402) * float64(buckets_len) * float64(buckets_len) * Z)
 
 	return cardinality
 }
 
 func main() {
-	temp_str := "Hello"
-	hash := generate_hash(temp_str)
-	fmt.Printf("%b\n", hash)
-	k_bits := get_first_k_bits(3, hash)
-	fmt.Println("k_bits: ", k_bits)
-	msb := get_msb_of_remaining_hash(3, hash)
-	fmt.Println("msb: ", msb)
+	// Runner function
+
+	// This example outputs 203
+	// cardinality := hyperLogLog(3, []string{"hi", "bye", "yo", "hi", "hello", "main", "next"})
+	// fmt.Println(cardinality)
 
 	return
 }
