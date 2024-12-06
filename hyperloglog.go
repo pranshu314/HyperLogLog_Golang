@@ -112,20 +112,43 @@ func generate_hash(text string) []byte {
 	return hash
 }
 
-func get_first_k_bits(k int, hash []byte) {
+func get_first_k_bits(k int, hash []byte) uint64 {
 	bs := NewBStreamReader(hash)
 	k_bits, err := bs.ReadBits(k)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
+		panic(1)
 	}
-	fmt.Printf("%b\n", k_bits)
+
+	return k_bits
+}
+
+func get_msb_of_remaining_hash(k int, hash []byte) int {
+	msb := 0
+	bs := NewBStreamReader(hash)
+	for msb <= len(hash)*8 {
+		bt, err := bs.ReadBit()
+		if err != nil {
+			fmt.Println("Error: ", err)
+			panic(1)
+		}
+		msb++
+		// fmt.Println(bt)
+		if bt && msb > k {
+			return msb - k
+		}
+	}
+	return msb - k
 }
 
 func main() {
 	temp_str := "Hello"
 	hash := generate_hash(temp_str)
 	fmt.Printf("%b\n", hash)
-	get_first_k_bits(10, hash)
+	k_bits := get_first_k_bits(3, hash)
+	fmt.Println("k_bits: ", k_bits)
+	msb := get_msb_of_remaining_hash(3, hash)
+	fmt.Println("msb: ", msb)
 
 	return
 }
